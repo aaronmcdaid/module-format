@@ -63,6 +63,17 @@ namespace format {
                 +   right.get_as_string()
                 );
 
+        if  (   right.size() >= 2
+             && right.at(0) == '{'
+             && right.at(1) == '{'
+            ) {
+            right.pop_front(); // skip over one of them
+            char popped = right.pop_front();
+            char snuck_in = left.sneak_ahead();
+            assert(popped == snuck_in); // == '{'
+            return {left,right};
+        }
+
         // move everything from the beginning of `right` to the end of
         // `left` if it's not a special character
         while(1) {

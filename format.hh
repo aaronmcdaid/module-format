@@ -66,7 +66,10 @@ namespace format {
         // move everything from the beginning of `right` to the end of
         // `left` if it's not a special character
         while(1) {
-            if(!right.empty() && right.at(0) != '{') {
+            if  (   !right.empty()
+                 && right.at(0) != '{'
+                 && right.at(0) != '}'
+                 ) {
                 PP(left.size(), right.size());
                 char popped = right.pop_front();
                 char snuck_in = left.sneak_ahead();

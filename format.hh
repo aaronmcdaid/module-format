@@ -55,22 +55,28 @@ namespace format {
     };
 
     std:: pair<string_view, string_view>  consume_simple(string_view all)     {
+        /* Consume one of four things:
+         *  - literal '{{', representing a single '{'
+         *  - literal '}}', representing a single '}'
+         *  - a format string, beginning with '{'
+         *  - as many non-{} characters as possible
+         */
         string_view     left (all);
         string_view     right(all);
-        left.e = 0;
+        left.e = left.b;
         assert  (   all.get_as_string()
                 ==  left.get_as_string()
                 +   right.get_as_string()
                 );
 
         if  (   right.size() >= 2
-             && right.at(0) == '{'
-             && right.at(1) == '{'
+             && right.at(0) == right.at(1)
+             && (   right.at(0) == '{' || right.at(0) == '}'    )
             ) {
             right.pop_front(); // skip over one of them
             char popped = right.pop_front();
             char snuck_in = left.sneak_ahead();
-            assert(popped == snuck_in); // == '{'
+            assert(popped == snuck_in); // == '{' or '}'
             return {left,right};
         }
 
@@ -81,13 +87,13 @@ namespace format {
                  && right.at(0) != '{'
                  && right.at(0) != '}'
                  ) {
-                PP(left.size(), right.size());
                 char popped = right.pop_front();
                 char snuck_in = left.sneak_ahead();
                 assert(popped == snuck_in);
-                continue;
             }
-            break;
+            else {
+                break;
+            }
         }
 
         assert  (   all.get_as_string()
@@ -98,10 +104,14 @@ namespace format {
     }
 
     std:: string    format(char const *fmt) {
-        string_view f(fmt);
+        string_view remainder(fmt);
 
-        auto p = consume_simple(f);
-        PP(utils:: nice_operator_shift_left(p.first.get_as_string()), utils:: nice_operator_shift_left(p.second.get_as_string()));
+        while(!remainder.empty()) {
+            auto p = consume_simple(remainder);
+
+            PP(utils:: nice_operator_shift_left(p.first.get_as_string()));
+            remainder = p.second;
+        }
         return fmt;
     }
 

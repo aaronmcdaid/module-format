@@ -80,6 +80,28 @@ namespace format {
             return {left,right};
         }
 
+        if  (   right.size() >=2
+             && right.at(0) == '{'
+             && right.at(1) != '{'
+            ) {
+            // a formatting substring - must read up until
+            // the corresponding '}'
+            int current_stack = 0;
+            do {
+                if(right.at(0) == '{') {
+                    ++current_stack;
+                }
+                if(right.at(0) == '}') {
+                    --current_stack;
+                }
+                char popped = right.pop_front();
+                char snuck_in = left.sneak_ahead();
+                assert(popped == snuck_in);
+            } while(current_stack > 0);
+            assert(current_stack == 0);
+            return {left,right};
+        }
+
         // move everything from the beginning of `right` to the end of
         // `left` if it's not a special character
         while(1) {

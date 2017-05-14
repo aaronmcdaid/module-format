@@ -3,6 +3,18 @@
  *
  * I'll start with a simple run-time implementation first, as it's easier
  * to develop and test.
+ *
+ * Based on C#: https://msdn.microsoft.com/en-us/library/txafckwd(v=vs.110).aspx
+ *
+ * { index,alignment;delimiter:formatString}
+ *
+ * alignment:
+ *      - the number is a minimum width, e.g. '>5'
+ *      - ?consider '>' to specify a maximum width?
+ *      - ?consider '=' to specify an exact width?
+ *      - negative means left aligned
+ *
+ * delimiter
  */
 #ifndef HH_FORMAT_HH
 #define HH_FORMAT_HH
@@ -10,8 +22,11 @@
 #include<string>
 #include<cstring>
 #include<cassert>
+#include<vector>
+#include<memory>
 
 #include "../bits.and.pieces/PP.hh" // TODO: remove this PP include
+#include "../bits.and.pieces/utils.hh"
 
 namespace format {
     struct string_view {
@@ -51,6 +66,20 @@ namespace format {
         }
         size_t                  size() const {
             return e-b;
+        }
+
+        template<size_t Nplus1>
+        bool                    operator==(char const (&a)[Nplus1]) {
+            assert(a[Nplus1-1] == '\0');
+            if(size() != Nplus1-1)
+                return false;
+            return
+                utils:: make_a_pack_and_apply_it<Nplus1-1, size_t> (
+                    [&](auto ... idxs) {
+                        bool all_tested = utils:: and_all( a[idxs] == backing[b+idxs] ...);
+                        return all_tested;
+                    }
+                );
         }
     };
 
@@ -124,15 +153,40 @@ namespace format {
                 );
         return {left, right};
     }
+    struct stored_format_data_for_later_I {
+        virtual     std:: string apply_this_format(string_view) = 0;
+    };
+    template<typename T>
+    struct stored_format_data_for_later : stored_format_data_for_later_I {
+        T   m_data;
 
-    std:: string    format(char const *fmt) {
+        template<typename U>
+        stored_format_data_for_later(U &&u) : m_data( std::forward<U>(u) ) {}
+
+        virtual     std:: string apply_this_format(string_view) override {
+            return "?";
+        }
+    };
+
+    template<typename ...Ts>
+    std:: string    format(char const *fmt, Ts const & ...ts) {
+        std:: vector< std:: shared_ptr< stored_format_data_for_later_I >> all_arg_data{
+            std:: make_shared<stored_format_data_for_later<Ts>>(ts) ... };
+
         string_view remainder(fmt);
 
         while(!remainder.empty()) {
             auto p = consume_simple(remainder);
 
-            PP(utils:: nice_operator_shift_left(p.first.get_as_string()));
             remainder = p.second;
+
+            auto current_token = p.first;
+            PP(utils:: nice_operator_shift_left(current_token.get_as_string()));
+
+            if(current_token == "{0}") {
+            }
+            if(current_token == "{1}") {
+            }
         }
         return fmt;
     }

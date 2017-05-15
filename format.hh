@@ -28,6 +28,8 @@
 #include "../bits.and.pieces/PP.hh" // TODO: remove this PP include
 #include "../bits.and.pieces/utils.hh"
 
+#define AMD_FORMATTED_STRING(s, ...) [](){ struct local { constexpr static char const * str() { return s; }}; return format:: make_a_char_pack_from_stringy_type<local>::type{}; }()
+
 namespace format {
     struct string_view {
         char const *    backing;
@@ -190,6 +192,20 @@ namespace format {
         }
         return fmt;
     }
+
+    template<typename string_provider_t>
+    struct make_a_char_pack_from_stringy_type {
+        constexpr static size_t len =  strlen( string_provider_t :: str());
+        constexpr static char   at(size_t i) {
+            return string_provider_t:: str() [i];
+        }
+        static
+        auto compute_the_char_pack_type () {
+            return
+            utils:: make_a_pack_and_apply_it<len, size_t> ( [](auto ...idxs) {  using return_type = utils:: char_pack< make_a_char_pack_from_stringy_type::at(idxs) ...>; return return_type{}; });
+        }
+        using type = decltype( compute_the_char_pack_type() );
+    };
 
 } // namespace format
 #endif

@@ -223,6 +223,7 @@ namespace format {
             }
 
             constexpr static size_t     size()  { return sizeof...(T); }
+            constexpr static auto       size_ty()   { return utils:: cx_val<size_t,sizeof...(T)>; }
         };
 
         // make_type_vector

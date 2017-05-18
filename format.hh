@@ -230,9 +230,9 @@ namespace format {
             return {};
         }
         template<typename ...T, typename F>
-        auto map_type   (   type_vector<T...>   , F f) {
-            return make_type_vector( f( T{} ) ... );
-        }
+        auto map_type   (   type_vector<T...>   , F f)
+        -> decltype(    make_type_vector( f( T{} ) ... )    )
+        { return {}; (void)f; }
         template<typename ...T1, typename ...T2>
         auto concat_type_vectors   (   type_vector<T1...>   , type_vector<T2...> ) {
             return make_type_vector( T1{}..., T2{}... );

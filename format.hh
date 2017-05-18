@@ -251,7 +251,7 @@ namespace format {
     auto parse_many_things(utils:: char_pack<c...> s) {
         static_assert(sizeof...(c) > 0 ,"");
         auto head_and_tail = parse_one_thing(s);
-        return std:: tuple_cat  (   std:: make_tuple    (head_and_tail.first)
+        return std:: make_pair  (                        head_and_tail.first
                                 ,   parse_many_things   (head_and_tail.second)
                 );
     }

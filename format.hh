@@ -215,11 +215,14 @@ namespace format {
         template<typename ...T>
         struct type_vector {
             using as_tuple = std:: tuple<T...>;
+
             template<typename V>
             constexpr static auto at_type(V v) {
                 return typename std:: tuple_element< v , as_tuple> :: type {};
                 //return std::get<V>(as_tuple{});
             }
+
+            constexpr static size_t     size()  { return sizeof...(T); }
         };
         template<typename ...T>
         type_vector<T...> make_type_vector( T ... ) {

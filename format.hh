@@ -216,6 +216,16 @@ namespace format {
     };
     template<typename corresponding_char_pack>
     struct formatter {
+        template<typename Tup
+            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< corresponding_char_pack, utils::char_pack<'{','0','}'> >{} ) >
+        void run(std:: ostringstream &oss, Tup && tup) {
+            oss << std::get<0> (tup);
+        }
+        template<typename Tup
+            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< corresponding_char_pack, utils::char_pack<'{','1','}'> >{} ) >
+        void run(std:: ostringstream &oss, Tup && tup) {
+            oss << std::get<1> (tup);
+        }
     };
 
     template <char first_char, char ...c
@@ -260,6 +270,7 @@ namespace format {
             ,   typename        Tup         >
     void go_forth_and_print(std::ostringstream &, std::tuple<> , Tup &&) {
     }
+
     template<   size_t          num_formatters_so_far
             ,   typename        head_subtype
             ,   typename        tail_type
@@ -268,13 +279,14 @@ namespace format {
         oss << head_subtype :: c_str0();
         go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Tup>(tup));
     }
+
     template<   size_t          num_formatters_so_far
             ,   typename        head_subtype
             ,   typename        tail_type
             ,   typename        Tup         >
     void go_forth_and_print(std::ostringstream &oss, std:: pair<formatter<head_subtype>, tail_type> p, Tup && tup  ) {
-        oss << head_subtype :: c_str0();
-        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Tup>(tup));
+        p.first.run(oss, std::forward<Tup>(tup) );
+        go_forth_and_print<1+num_formatters_so_far>(oss, p.second, std::forward<Tup>(tup));
     }
 
     template<char ...chars, typename ...Ts>

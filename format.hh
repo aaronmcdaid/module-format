@@ -228,6 +228,19 @@ namespace format {
         }
     };
 
+    template < char ...c >
+    auto parse_one_thing(utils:: char_pack<'{', '{', c...> s) {
+        auto    head    = s.template substr<1>();
+        auto    tail    = s.template substr<2, s.size()>();
+        return std:: make_pair( plain_output<decltype(head)>{}, tail);
+    }
+    template < char ...c >
+    auto parse_one_thing(utils:: char_pack<'}', '}', c...> s) {
+        auto    head    = s.template substr<1>();
+        auto    tail    = s.template substr<2, s.size()>();
+        return std:: make_pair( plain_output<decltype(head)>{}, tail);
+    }
+
     template <char first_char, char ...c
         , typename ...
         , FORMAT_ENABLE_IF_THINGY( first_char != '{' && first_char != '}')
@@ -243,9 +256,9 @@ namespace format {
         return std:: make_pair( plain_output<decltype(head)>{}, tail);
     }
     template <char m, char ...c
+        , FORMAT_ENABLE_IF_THINGY( m >= '0' && m <= '9' )
         >
     auto parse_one_thing(utils:: char_pack<'{', m, '}', c...> s) {
-        static_assert( m >= '0' && m <= '9' ,"");
         size_t constexpr length_of_head = 3;
 
         auto    head    = s.template substr<length_of_head>();

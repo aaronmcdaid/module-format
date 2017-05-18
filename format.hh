@@ -256,13 +256,37 @@ namespace format {
                 );
     }
 
-    template<char ...chars, typename Ts>
-    auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ) {
+    template<   size_t          num_formatters_so_far
+            ,   typename    ... Ts         >
+    void go_forth_and_print(std::ostringstream &, std::tuple<> , Ts && ...) {
+    }
+    template<   size_t          num_formatters_so_far
+            ,   typename        head_subtype
+            ,   typename        tail_type
+            ,   typename    ... Ts         >
+    void go_forth_and_print(std::ostringstream &oss, std:: pair<plain_output<head_subtype>, tail_type> p, Ts && ... ts) {
+        oss << head_subtype :: c_str0();
+        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Ts>(ts)...);
+    }
+    template<   size_t          num_formatters_so_far
+            ,   typename        head_subtype
+            ,   typename        tail_type
+            ,   typename    ... Ts         >
+    void go_forth_and_print(std::ostringstream &oss, std:: pair<formatter<head_subtype>, tail_type> p, Ts && ... ts) {
+        oss << head_subtype :: c_str0();
+        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Ts>(ts)...);
+    }
+
+    template<char ...chars, typename ...Ts>
+    auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ts) {
 
         auto all_parsed = parse_many_things(s);
         utils::print_type(all_parsed);
 
-        return s;
+        std:: ostringstream oss;
+        go_forth_and_print<0>(oss, all_parsed, std::forward<Ts>(ts)...);
+
+        return oss.str();
     }
 
 } // namespace format

@@ -236,20 +236,23 @@ namespace format {
         return std:: make_pair(head, tail);
     }
 
+    auto parse_many_things(utils:: char_pack<>) {
+        return std:: make_tuple();
+    }
+    template <char ...c>
+    auto parse_many_things(utils:: char_pack<c...> s) {
+        static_assert(sizeof...(c) > 0 ,"");
+        auto head_and_tail = parse_one_thing(s);
+        return std:: tuple_cat  (   std:: make_tuple    (head_and_tail.first)
+                                ,   parse_many_things   (head_and_tail.second)
+                );
+    }
+
     template<char ...chars, typename Ts>
     auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ) {
-        auto p1 = parse_one_thing(s);
-        auto p2 = parse_one_thing(p1.second);
-        auto p3 = parse_one_thing(p2.second);
-        auto p4 = parse_one_thing(p3.second);
-        auto p5 = parse_one_thing(p4.second);
-        utils:: print_type(p1.first);
-        utils:: print_type(p2.first);
-        utils:: print_type(p3.first);
-        utils:: print_type(p4.first);
-        utils:: print_type(p5.first);
 
-        utils:: print_type(p5.second);
+        auto all_parsed = parse_many_things(s);
+        utils::print_type(all_parsed);
 
         return s;
     }

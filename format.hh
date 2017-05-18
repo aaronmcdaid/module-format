@@ -211,6 +211,44 @@ namespace format {
 
 #define FORMAT_ENABLE_IF_THINGY(...) std:: enable_if_t< __VA_ARGS__ > * = nullptr
 
+    namespace type_vector_ns {
+        template<typename ...T>
+        struct type_vector {
+            using as_tuple = std:: tuple<T...>;
+            template<typename V>
+            constexpr static auto at_type(V v) {
+                return typename std:: tuple_element< v , as_tuple> :: type {};
+                //return std::get<V>(as_tuple{});
+            }
+        };
+        template<typename ...T>
+        type_vector<T...> make_type_vector( T ... ) {
+            static_assert( utils:: and_all( std:: is_empty<T> ::value ... ) ,"");
+            return {};
+        }
+        template<typename ...T, typename F>
+        auto map_type   (   type_vector<T...>   , F f) {
+            return make_type_vector( f( T{} ) ... );
+        }
+        template<typename ...T1, typename ...T2>
+        auto concat_type_vectors   (   type_vector<T1...>   , type_vector<T2...> ) {
+            return make_type_vector( T1{}..., T2{}... );
+        }
+        template<typename I>
+        auto cumsum_type   (    I init,   type_vector<> ) {
+            return make_type_vector( utils:: cx_val<int, init> ) ;
+        }
+        template<typename T0, typename ...Trest, typename I>
+        auto cumsum_type   (    I init,   type_vector<T0, Trest...> ) {
+            return concat_type_vectors  (
+                                            make_type_vector( utils:: cx_val<int, init + T0{}> )
+                                        ,   cumsum_type( utils::cx_val<int, init+T0{}>, type_vector<Trest...>{})
+                                        )
+                                            ;
+        }
+    } // namespace type_vector_ns
+
+
     template<typename corresponding_char_pack>
     struct plain_output { };
 

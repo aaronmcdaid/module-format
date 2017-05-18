@@ -224,19 +224,27 @@ namespace format {
 
             constexpr static size_t     size()  { return sizeof...(T); }
         };
+
+        // make_type_vector
         template<typename ...T>
         type_vector<T...> make_type_vector( T ... ) {
             static_assert( utils:: and_all( true, std:: is_empty<T> ::value ... ) ,"");
             return {};
         }
+
+        // map_type
         template<typename ...T, typename F>
         auto map_type   (   type_vector<T...>   , F f)
         -> decltype(    make_type_vector( f( T{} ) ... )    )
         { return {}; (void)f; }
+
+        // concat_type_vectors
         template<typename ...T1, typename ...T2>
         auto concat_type_vectors   (   type_vector<T1...>   , type_vector<T2...> ) {
             return make_type_vector( T1{}..., T2{}... );
         }
+
+        // cumsum_type
         template<typename I>
         auto cumsum_type   (    I     ,   type_vector<> emp) {
             return emp;
@@ -248,6 +256,22 @@ namespace format {
                                             ,   cumsum_type     (   first_sum, type_vector<Trest...>{})     );
             static_assert( tv.size() == ret.size() ,"");
             return ret;
+        }
+
+        // which
+        namespace detail {
+            template<size_t off>
+            auto    which(type_vector<>) {
+                return make_type_vector();
+            }
+            template<size_t off, typename B, typename ...Brest>
+            auto    which(type_vector<B, Brest...>) {
+                return detail:: which<off+1>( type_vector<Brest...>{} );
+            }
+        }
+        template<typename ...B>
+        auto    which(type_vector<B...> bvt) {
+            return detail:: which<0>(bvt);
         }
     } // namespace type_vector_ns
 
@@ -304,6 +328,7 @@ namespace format {
         using utils:: make_a_pack_and_apply_it;
         using utils:: cx_val;
         using type_vector_ns:: make_type_vector;
+        using type_vector_ns:: which;
 
         auto chars_as_type_vector = make_a_pack_and_apply_it<s.size(), size_t>(
                 [&](auto ... idxs) {
@@ -318,6 +343,7 @@ namespace format {
         static_assert( cumulative_sum. at_type(cx_val<int, 0>) == 1 ,"");
         static_assert( cumulative_sum. at_type(cx_val<int, 1>) == 1 ,"");
         static_assert( cumulative_sum. at_type(cx_val<int, 2>) == 0 ,""); // it's the closing brace
+        which(cumulative_sum);
 
         size_t constexpr length_of_head = 3;
 

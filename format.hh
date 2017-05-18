@@ -212,8 +212,32 @@ namespace format {
         using type = decltype( compute_the_char_pack_type() );
     };
 
+#define FORMAT_ENABLE_IF_THINGY(...) std:: enable_if_t< __VA_ARGS__ > * = nullptr
+
+    template <char first_char, char ...c
+        , typename ...
+        , FORMAT_ENABLE_IF_THINGY( first_char != '{' && first_char != '}')
+        >
+    auto parse_one_thing(utils:: char_pack<first_char, c...> s) {
+        // parse everything up to, but not including, '{' or '}' or '\0'
+        size_t constexpr end_of_first_thing = s.find_first_of('{','}','\0');
+        static_assert( end_of_first_thing > 0 ,"");
+        PP(end_of_first_thing);
+
+        auto  head = utils:: make_a_pack_and_apply_it<end_of_first_thing, size_t>([&](auto ... idxs){
+                return utils:: char_pack< s.at(idxs) ... >{};
+        });
+        auto  tail = utils:: make_a_pack_and_apply_it<s.size()-end_of_first_thing, size_t>([=](auto ... idxs){
+                //constexpr size_t length_of_head = end_of_first_thing;
+                return utils:: char_pack< s.at( (size_t)idxs + end_of_first_thing) ... >{};
+        });
+        PP(head.c_str0());
+        PP(tail.c_str0());
+    }
+
     template<char ...chars, typename Ts>
     auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ) {
+        parse_one_thing(s);
         return s;
     }
 

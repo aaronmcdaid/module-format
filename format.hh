@@ -212,23 +212,19 @@ namespace format {
 #define FORMAT_ENABLE_IF_THINGY(...) std:: enable_if_t< __VA_ARGS__ > * = nullptr
 
     template<typename corresponding_char_pack>
-    struct plain_output {
-    };
+    struct plain_output { };
+
     template<typename corresponding_char_pack>
     struct formatter {
         template<typename Tup
             ,   class ...
             ,   typename copy_of_corresponding_char_pack = corresponding_char_pack
-            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< copy_of_corresponding_char_pack, utils::char_pack<'{','0','}'> >{} ) >
+            ,   FORMAT_ENABLE_IF_THINGY( copy_of_corresponding_char_pack::at(0) == '{' )
+            ,   FORMAT_ENABLE_IF_THINGY( copy_of_corresponding_char_pack::at(1) >= '0' )
+            ,   FORMAT_ENABLE_IF_THINGY( copy_of_corresponding_char_pack::at(1) <= '9' )
+            ,   FORMAT_ENABLE_IF_THINGY( copy_of_corresponding_char_pack::at(2) == '}' )    >
         void run(std:: ostringstream &oss, Tup && tup) {
-            oss << std::get<0> (tup);
-        }
-        template<typename Tup
-            ,   class ...
-            ,   typename copy_of_corresponding_char_pack = corresponding_char_pack
-            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< copy_of_corresponding_char_pack, utils::char_pack<'{','1','}'> >{} ) >
-        void run(std:: ostringstream &oss, Tup && tup) {
-            oss << std::get<1> (tup);
+            oss << std::get< copy_of_corresponding_char_pack::at(1) - '0' > (tup);
         }
     };
 

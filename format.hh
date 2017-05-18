@@ -211,6 +211,13 @@ namespace format {
 
 #define FORMAT_ENABLE_IF_THINGY(...) std:: enable_if_t< __VA_ARGS__ > * = nullptr
 
+    template<typename corresponding_char_pack>
+    struct plain_output {
+    };
+    template<typename corresponding_char_pack>
+    struct formatter {
+    };
+
     template <char first_char, char ...c
         , typename ...
         , FORMAT_ENABLE_IF_THINGY( first_char != '{' && first_char != '}')
@@ -223,17 +230,18 @@ namespace format {
         auto    head    = s.template substr<length_of_head>();
         auto    tail    = s.template substr<length_of_head, s.size()>();
 
-        return std:: make_pair(head, tail);
+        return std:: make_pair( plain_output<decltype(head)>{}, tail);
     }
     template <char m, char ...c
         >
     auto parse_one_thing(utils:: char_pack<'{', m, '}', c...> s) {
+        static_assert( m >= '0' && m <= '9' ,"");
         size_t constexpr length_of_head = 3;
 
         auto    head    = s.template substr<length_of_head>();
         auto    tail    = s.template substr<length_of_head, s.size()>();
 
-        return std:: make_pair(head, tail);
+        return std:: make_pair( formatter<decltype(head)>{}, tail);
     }
 
     auto parse_many_things(utils:: char_pack<>) {

@@ -193,9 +193,14 @@ namespace format {
         return fmt;
     }
 
+    /* Start the 'compile-time' version of this */
+    constexpr static size_t cx_strlen(char const *s) {
+        return *s=='\0' ? 0 : (1+cx_strlen(s+1));
+    }
+
     template<typename string_provider_t>
     struct make_a_char_pack_from_stringy_type {
-        constexpr static size_t len =  strlen( string_provider_t :: str());
+        constexpr static size_t len =  cx_strlen( string_provider_t :: str());
         constexpr static char   at(size_t i) {
             return string_provider_t:: str() [i];
         }

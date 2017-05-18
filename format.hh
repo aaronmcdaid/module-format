@@ -235,8 +235,8 @@ namespace format {
             return make_type_vector( T1{}..., T2{}... );
         }
         template<typename I>
-        auto cumsum_type   (    I init,   type_vector<> ) {
-            return make_type_vector( utils:: cx_val<int, init> ) ;
+        auto cumsum_type   (    I     ,   type_vector<> emp) {
+            return emp;
         }
         template<typename T0, typename ...Trest, typename I>
         auto cumsum_type   (    I init,   type_vector<T0, Trest...> ) {

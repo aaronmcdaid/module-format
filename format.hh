@@ -240,11 +240,9 @@ namespace format {
         }
         template<typename T0, typename ...Trest, typename I>
         auto cumsum_type   (    I init,   type_vector<T0, Trest...> ) {
-            return concat_type_vectors  (
-                                            make_type_vector( utils:: cx_val<int, init + T0{}> )
-                                        ,   cumsum_type( utils::cx_val<int, init+T0{}>, type_vector<Trest...>{})
-                                        )
-                                            ;
+            auto first_sum = utils:: cx_val<int, init + T0{}>;
+            return concat_type_vectors  (   make_type_vector(   first_sum )
+                                        ,   cumsum_type     (   first_sum, type_vector<Trest...>{})     );
         }
     } // namespace type_vector_ns
 

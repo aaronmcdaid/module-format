@@ -348,14 +348,17 @@ namespace format {
         auto is_zero        = map_type  (   cumulative_sum
                                         ,   [](auto x) { return x == cx_val<int, 0>; });
         auto which_are_zero = which(is_zero);
+        static_assert( which_are_zero.size_ty() > 0, "");
+        auto constexpr first_zero = which_are_zero . at_ty( cx_val<int, 0> );
+
+        // Next few asserts are too conservative
+        static_assert( first_zero == cx_val<size_t,2> ,""); // first time the braces are balanced
+
         static_assert( cumulative_sum. at_ty(cx_val<int, 0>) == 1 ,"");
         static_assert( cumulative_sum. at_ty(cx_val<int, 1>) == 1 ,"");
         static_assert( cumulative_sum. at_ty(cx_val<int, 2>) == 0 ,""); // it's the closing brace
-        static_assert( which_are_zero.size_ty() > 0, "");
-        auto constexpr first_zero = which_are_zero . at_ty( cx_val<int, 0> );
-        static_assert( first_zero == cx_val<size_t,2> ,""); // first time the braces are balanced
 
-        size_t constexpr length_of_head = first_zero+1;
+        size_t constexpr length_of_head = first_zero+1; // to include the closing brace
 
         auto    head    = s.template substr<length_of_head>();
         auto    tail    = s.template substr<length_of_head, s.size()>();

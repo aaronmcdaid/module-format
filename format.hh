@@ -217,7 +217,7 @@ namespace format {
             using as_tuple = std:: tuple<T...>;
 
             template<typename V>
-            constexpr static auto at_type(V v) {
+            constexpr static auto at_ty(V v) {
                 return typename std:: tuple_element< v , as_tuple> :: type {};
                 //return std::get<V>(as_tuple{});
             }
@@ -348,11 +348,11 @@ namespace format {
         auto is_zero        = map_type  (   cumulative_sum
                                         ,   [](auto x) { return x == cx_val<int, 0>; });
         auto which_are_zero = which(is_zero);
-        static_assert( cumulative_sum. at_type(cx_val<int, 0>) == 1 ,"");
-        static_assert( cumulative_sum. at_type(cx_val<int, 1>) == 1 ,"");
-        static_assert( cumulative_sum. at_type(cx_val<int, 2>) == 0 ,""); // it's the closing brace
+        static_assert( cumulative_sum. at_ty(cx_val<int, 0>) == 1 ,"");
+        static_assert( cumulative_sum. at_ty(cx_val<int, 1>) == 1 ,"");
+        static_assert( cumulative_sum. at_ty(cx_val<int, 2>) == 0 ,""); // it's the closing brace
         static_assert( which_are_zero.size_ty() > 0, "");
-        auto first_zero = which_are_zero . at_type( cx_val<int, 0> );
+        auto first_zero = which_are_zero . at_ty( cx_val<int, 0> );
         static_assert( first_zero == cx_val<size_t,2> ,""); // first time the braces are balanced
 
         size_t constexpr length_of_head = first_zero+1;

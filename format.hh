@@ -265,8 +265,15 @@ namespace format {
             auto    which(type_vector<>) {
                 return make_type_vector();
             }
-            template<size_t off, typename B, typename ...Brest>
-            auto    which(type_vector<B, Brest...>) {
+            template<size_t off, typename ...Brest> auto    which(type_vector< utils:: compile_time_constant_as_a_type<bool, true >, Brest...>);
+            template<size_t off, typename ...Brest> auto    which(type_vector< utils:: compile_time_constant_as_a_type<bool, false>, Brest...>);
+            template<size_t off, typename ...Brest>
+            auto    which(type_vector< utils:: compile_time_constant_as_a_type<bool, true>, Brest...>) {
+                return concat_type_vectors  (   make_type_vector( utils:: cx_val<size_t, off> )
+                                            ,   detail:: which<off+1>( type_vector<Brest...>{} )        );
+            }
+            template<size_t off, typename ...Brest>
+            auto    which(type_vector< utils:: compile_time_constant_as_a_type<bool, false>, Brest...>) {
                 return detail:: which<off+1>( type_vector<Brest...>{} );
             }
         }
@@ -332,21 +339,23 @@ namespace format {
         using type_vector_ns:: which;
 
         auto chars_as_type_vector = make_a_pack_and_apply_it<s.size(), size_t>(
-                [&](auto ... idxs) {
-                    return make_type_vector( cx_val<char, s.at(idxs)> ... ) ;
-        });
+                [&](auto ... idxs) { return make_type_vector( cx_val<char, s.at(idxs)> ... ) ; });
         auto mapped = map_type(chars_as_type_vector, [](auto x){
-                return cx_val<int,
-                                        x=='{'  ?   1   :
+                return cx_val<int,      x=='{'  ?    1  :
                                         x=='}'  ?   -1  :
-                                                    0       >;});
+                                                     0       >;});
         auto cumulative_sum = cumsum_type(cx_val<int,0>, mapped);
+        auto is_zero        = map_type  (   cumulative_sum
+                                        ,   [](auto x) { return x == cx_val<int, 0>; });
+        auto which_are_zero = which(is_zero);
         static_assert( cumulative_sum. at_type(cx_val<int, 0>) == 1 ,"");
         static_assert( cumulative_sum. at_type(cx_val<int, 1>) == 1 ,"");
         static_assert( cumulative_sum. at_type(cx_val<int, 2>) == 0 ,""); // it's the closing brace
-        which(cumulative_sum);
+        static_assert( which_are_zero.size_ty() > 0, "");
+        auto first_zero = which_are_zero . at_type( cx_val<int, 0> );
+        static_assert( first_zero == cx_val<size_t,2> ,""); // first time the braces are balanced
 
-        size_t constexpr length_of_head = 3;
+        size_t constexpr length_of_head = first_zero+1;
 
         auto    head    = s.template substr<length_of_head>();
         auto    tail    = s.template substr<length_of_head, s.size()>();

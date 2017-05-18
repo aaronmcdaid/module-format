@@ -228,11 +228,38 @@ namespace format {
 
         PP(head.c_str0());
         PP(tail.c_str0());
+
+        return std:: make_pair(head, tail);
+    }
+    template <char m, char ...c
+        >
+    auto parse_one_thing(utils:: char_pack<'{', m, '}', c...> s) {
+        size_t constexpr length_of_head = 3;
+
+        auto    head    = s.template substr<length_of_head>();
+        auto    tail    = s.template substr<length_of_head, s.size()>();
+
+        PP(head.c_str0());
+        PP(tail.c_str0());
+
+        return std:: make_pair(head, tail);
     }
 
     template<char ...chars, typename Ts>
     auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ) {
-        parse_one_thing(s);
+        auto p1 = parse_one_thing(s);
+        auto p2 = parse_one_thing(p1.second);
+        auto p3 = parse_one_thing(p2.second);
+        auto p4 = parse_one_thing(p3.second);
+        auto p5 = parse_one_thing(p4.second);
+        utils:: print_type(p1.first);
+        utils:: print_type(p2.first);
+        utils:: print_type(p3.first);
+        utils:: print_type(p4.first);
+        utils:: print_type(p5.first);
+
+        utils:: print_type(p5.second);
+
         return s;
     }
 

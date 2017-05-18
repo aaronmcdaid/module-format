@@ -303,10 +303,9 @@ namespace format {
     }
 
     template<char ...chars, typename ...Ts>
-    auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ts) {
+    std:: string do_formatting( utils:: char_pack<chars...> s, Ts && ... ts) {
 
         auto all_parsed = parse_many_things(s);
-        utils::print_type(all_parsed);
 
         std:: ostringstream oss;
         go_forth_and_print<0>(oss, all_parsed, std:: forward_as_tuple(std::forward<Ts>(ts)...) );

@@ -257,24 +257,24 @@ namespace format {
     }
 
     template<   size_t          num_formatters_so_far
-            ,   typename    ... Ts         >
-    void go_forth_and_print(std::ostringstream &, std::tuple<> , Ts && ...) {
+            ,   typename        Tup         >
+    void go_forth_and_print(std::ostringstream &, std::tuple<> , Tup &&) {
     }
     template<   size_t          num_formatters_so_far
             ,   typename        head_subtype
             ,   typename        tail_type
-            ,   typename    ... Ts         >
-    void go_forth_and_print(std::ostringstream &oss, std:: pair<plain_output<head_subtype>, tail_type> p, Ts && ... ts) {
+            ,   typename        Tup         >
+    void go_forth_and_print(std::ostringstream &oss, std:: pair<plain_output<head_subtype>, tail_type> p, Tup && tup ) {
         oss << head_subtype :: c_str0();
-        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Ts>(ts)...);
+        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Tup>(tup));
     }
     template<   size_t          num_formatters_so_far
             ,   typename        head_subtype
             ,   typename        tail_type
-            ,   typename    ... Ts         >
-    void go_forth_and_print(std::ostringstream &oss, std:: pair<formatter<head_subtype>, tail_type> p, Ts && ... ts) {
+            ,   typename        Tup         >
+    void go_forth_and_print(std::ostringstream &oss, std:: pair<formatter<head_subtype>, tail_type> p, Tup && tup  ) {
         oss << head_subtype :: c_str0();
-        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Ts>(ts)...);
+        go_forth_and_print<num_formatters_so_far>(oss, p.second, std::forward<Tup>(tup));
     }
 
     template<char ...chars, typename ...Ts>
@@ -284,7 +284,7 @@ namespace format {
         utils::print_type(all_parsed);
 
         std:: ostringstream oss;
-        go_forth_and_print<0>(oss, all_parsed, std::forward<Ts>(ts)...);
+        go_forth_and_print<0>(oss, all_parsed, std:: forward_as_tuple(std::forward<Ts>(ts)...) );
 
         return oss.str();
     }

@@ -25,7 +25,6 @@
 #include<vector>
 #include<memory>
 
-#include "../bits.and.pieces/PP.hh" // TODO: remove this PP include
 #include "../bits.and.pieces/utils.hh"
 
 #define AMD_FORMATTED_STRING(s, ...) format:: do_formatting( [](){ struct local { constexpr static char const * str() { return s; }}; return format:: make_a_char_pack_from_stringy_type<local>::type{}; }() ,__VA_ARGS__)
@@ -183,8 +182,6 @@ namespace format {
             remainder = p.second;
 
             auto current_token = p.first;
-            PP(utils:: nice_operator_shift_left(current_token.get_as_string()));
-
             if(current_token == "{0}") {
             }
             if(current_token == "{1}") {
@@ -226,9 +223,6 @@ namespace format {
         auto    head    = s.template substr<length_of_head>();
         auto    tail    = s.template substr<length_of_head, s.size()>();
 
-        PP(head.c_str0());
-        PP(tail.c_str0());
-
         return std:: make_pair(head, tail);
     }
     template <char m, char ...c
@@ -238,9 +232,6 @@ namespace format {
 
         auto    head    = s.template substr<length_of_head>();
         auto    tail    = s.template substr<length_of_head, s.size()>();
-
-        PP(head.c_str0());
-        PP(tail.c_str0());
 
         return std:: make_pair(head, tail);
     }

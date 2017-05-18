@@ -293,10 +293,29 @@ namespace format {
 
         return std:: make_pair( plain_output<decltype(head)>{}, tail);
     }
+
     template <char m, char ...c
-        , FORMAT_ENABLE_IF_THINGY( m >= '0' && m <= '9' )
+        , FORMAT_ENABLE_IF_THINGY( m != '{' )
         >
     auto parse_one_thing(utils:: char_pack<'{', m, '}', c...> s) {
+        using utils:: make_a_pack_and_apply_it;
+        using utils:: cx_val;
+        using type_vector_ns:: make_type_vector;
+
+        auto chars_as_type_vector = make_a_pack_and_apply_it<s.size(), size_t>(
+                [&](auto ... idxs) {
+                    return make_type_vector( cx_val<char, s.at(idxs)> ... ) ;
+        });
+        auto mapped = map_type(chars_as_type_vector, [](auto x){
+                return cx_val<int,
+                                        x=='{'  ?   1   :
+                                        x=='}'  ?   -1  :
+                                                    0       >;});
+        auto cumulative_sum = cumsum_type(cx_val<int,0>, mapped);
+        static_assert( cumulative_sum. at_type(cx_val<int, 0>) == 1 ,"");
+        static_assert( cumulative_sum. at_type(cx_val<int, 1>) == 1 ,"");
+        static_assert( cumulative_sum. at_type(cx_val<int, 2>) == 0 ,""); // it's the closing brace
+
         size_t constexpr length_of_head = 3;
 
         auto    head    = s.template substr<length_of_head>();

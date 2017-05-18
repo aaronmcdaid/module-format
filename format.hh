@@ -226,7 +226,7 @@ namespace format {
         };
         template<typename ...T>
         type_vector<T...> make_type_vector( T ... ) {
-            static_assert( utils:: and_all( std:: is_empty<T> ::value ... ) ,"");
+            static_assert( utils:: and_all( true, std:: is_empty<T> ::value ... ) ,"");
             return {};
         }
         template<typename ...T, typename F>

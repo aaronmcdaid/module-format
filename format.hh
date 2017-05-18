@@ -243,7 +243,7 @@ namespace format {
         }
         template<typename T0, typename ...Trest, typename I>
         auto cumsum_type   (    I init,   type_vector<T0, Trest...> tv) {
-            auto first_sum = utils:: cx_val<int, init + T0{}>;
+            auto first_sum = init + T0{};
             auto ret= concat_type_vectors   (   make_type_vector(   first_sum )
                                             ,   cumsum_type     (   first_sum, type_vector<Trest...>{})     );
             static_assert( tv.size() == ret.size() ,"");

@@ -217,12 +217,16 @@ namespace format {
     template<typename corresponding_char_pack>
     struct formatter {
         template<typename Tup
-            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< corresponding_char_pack, utils::char_pack<'{','0','}'> >{} ) >
+            ,   class ...
+            ,   typename copy_of_corresponding_char_pack = corresponding_char_pack
+            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< copy_of_corresponding_char_pack, utils::char_pack<'{','0','}'> >{} ) >
         void run(std:: ostringstream &oss, Tup && tup) {
             oss << std::get<0> (tup);
         }
         template<typename Tup
-            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< corresponding_char_pack, utils::char_pack<'{','1','}'> >{} ) >
+            ,   class ...
+            ,   typename copy_of_corresponding_char_pack = corresponding_char_pack
+            ,   FORMAT_ENABLE_IF_THINGY( std:: is_same< copy_of_corresponding_char_pack, utils::char_pack<'{','1','}'> >{} ) >
         void run(std:: ostringstream &oss, Tup && tup) {
             oss << std::get<1> (tup);
         }

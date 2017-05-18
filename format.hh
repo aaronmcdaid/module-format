@@ -28,7 +28,7 @@
 #include "../bits.and.pieces/PP.hh" // TODO: remove this PP include
 #include "../bits.and.pieces/utils.hh"
 
-#define AMD_FORMATTED_STRING(s, ...) [](){ struct local { constexpr static char const * str() { return s; }}; return format:: make_a_char_pack_from_stringy_type<local>::type{}; }()
+#define AMD_FORMATTED_STRING(s, ...) format:: do_formatting( [](){ struct local { constexpr static char const * str() { return s; }}; return format:: make_a_char_pack_from_stringy_type<local>::type{}; }() ,__VA_ARGS__)
 
 namespace format {
     struct string_view {
@@ -211,6 +211,11 @@ namespace format {
         }
         using type = decltype( compute_the_char_pack_type() );
     };
+
+    template<char ...chars, typename Ts>
+    auto do_formatting( utils:: char_pack<chars...> s, Ts && ... ) {
+        return s;
+    }
 
 } // namespace format
 #endif

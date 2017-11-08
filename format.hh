@@ -423,5 +423,21 @@ namespace format {
         return oss.str();
     }
 
+    template<char ... chars>
+    struct format_wrapper
+    {
+        template<typename ... T>
+        auto
+        operator() (T && ... t)
+        {
+            return format:: do_formatting( utils::char_pack<chars...>{} , std::forward<T>(t)...);
+        }
+    };
+
+    template<typename C, C ... cs>
+    auto operator"" _format ()
+    -> format_wrapper<cs...>
+    { return {}; }
+
 } // namespace format
 #endif
